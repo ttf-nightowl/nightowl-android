@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">NightOwl</string>
+    <string name="longitudine">Longitudine:</string>
+    <string name="latitudine">Latitudine:</string>
+    <string name="StringBottone">Cerca locali</string>
+    <string name="MessaggioMain">Posizione attuale:</string>
+    <string name="logo">Logo</string>
+</resources>
