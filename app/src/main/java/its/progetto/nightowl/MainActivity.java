@@ -53,11 +53,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         LocationManager mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         checkLocation(); //check whether location service is enable or not in your  phone
-        /*checkPosition.setOnClickListener(new View.OnClickListener() {
+        checkPosition.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                onStart();
+                Intent intent = new Intent (MainActivity.this, MapActivity.class);
+                startActivity(intent);
             }
-        });*/
+        });
     }
 
     @Override
