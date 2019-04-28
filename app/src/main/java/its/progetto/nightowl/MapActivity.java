@@ -193,21 +193,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     JSONObject obj = new JSONObject(result);
                     Log.i("massimo", "Sono nell'OnSuccess");
                     JSONArray array = obj.getJSONArray( "results" );
-                    JSONArray latlngArray = obj.getJSONArray("coordinates");
-                    LatLng mLocation = new LatLng(-33.8523341, 151.2106085);
+                    //JSONArray latlngArray = obj.getJSONArray("coordinates");
+                    //LatLng mLocation = new LatLng(-33.8523341, 151.2106085);
 
                     for( int i = 0; i < array.length(); i++ ) {
                         Log.i("massimo","sono nel ciclo for");
                         JSONObject rowObj = array.getJSONObject(i);
                         Log.i("massimo", "Località: " + rowObj.getString("location"));
                         Log.i("massimo", "Città: " + rowObj.getString("city") + " Paese: " + rowObj.getString("country"));
-                        for (int c = 0; c < latlngArray.length(); c++) {
-                            JSONObject latlngObj = latlngArray.getJSONObject(c);
-                            mLocation = new LatLng(latlngObj.getInt("latitude"), latlngObj.getInt("longitude"));
+                        //for (int c = 0; c < latlngArray.length(); c++) {
+                            //JSONObject latlngObj = latlngArray.getJSONObject(c);
+                            //mLocation = new LatLng(latlngObj.getInt("latitude"), latlngObj.getInt("longitude"));
 
                             Log.i("massimo", "Latitudine: " + rowObj.getInt("latitude") + " Longitudine: " + rowObj.getInt("longitude"));
-                        }
-                        //LatLng mLocation = new LatLng(rowObj.getInt("latitude"), rowObj.getInt("longitude"));
+                        //}
+                        LatLng mLocation = new LatLng(rowObj.getInt("latitude"), rowObj.getInt("longitude"));
                         mMap.addMarker(new MarkerOptions()
                                 .title(rowObj.getString("location"))
                                 .position(mLocation)
