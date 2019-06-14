@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         LocationManager mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        checkLocation(); //check whether location service is enable or not in your  phone
+        checkLocation(); //Controllo se il GPS sia attivo o meno sul telefono
         checkPosition.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent (MainActivity.this, MapActivity.class);
@@ -86,19 +86,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mLatitudeTextView.setText(String.valueOf(mLocation.getLatitude()));
             mLongitudeTextView.setText(String.valueOf(mLocation.getLongitude()));
         } else {
-            Toast.makeText(this, "Location not Detected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Posizione non trovata", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i(TAG, "Connection Suspended");
+        Log.i(TAG, "Connection sospesa");
         mGoogleApiClient.connect();
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(TAG, "Connection failed. Error: " + connectionResult.getErrorCode());
+        Log.i(TAG, "Connessione fallita: " + connectionResult.getErrorCode());
     }
 
     @Override
@@ -118,15 +118,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void startLocationUpdates() {
-        // Create the location request
-        /* 2 sec */
+        // Creazione della richiesta della posizione gps
+        /* 2 secondi */
         long FASTEST_INTERVAL = 2000;/* 10 secs */
         long UPDATE_INTERVAL = 2 * 1000;
         LocationRequest mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(UPDATE_INTERVAL)
                 .setFastestInterval(FASTEST_INTERVAL);
-        // Request location updates
+        // Richiesta dell'aggiornamento della posizione
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
                 PackageManager.PERMISSION_GRANTED) {
@@ -139,18 +139,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,
                 mLocationRequest, this);
-        Log.d("reque", "--->>>>");
+
     }
 
     @Override
     public void onLocationChanged(Location location) {
-
-        /*String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());*/
         mLatitudeTextView.setText(String.valueOf(location.getLatitude()));
         mLongitudeTextView.setText(String.valueOf(location.getLongitude() ));
-        //Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
         // You can now create a LatLng Object for use with maps
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
     }
@@ -163,10 +158,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private void showAlert() {
         final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Enable Location")
-                .setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " +
-                        "use this app")
-                .setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
+        dialog.setTitle("Attiva posizione gps")
+                .setMessage("La posizione GPS è disattivata.\nAttiva la posizione GPS " +
+                        "per poter usare l'app")
+                .setPositiveButton("Impostazioni", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface paramDialogInterface, int paramInt) {
 
@@ -174,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         startActivity(myIntent);
                     }
                 })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Anulla", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface paramDialogInterface, int paramInt) {
 

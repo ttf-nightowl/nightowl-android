@@ -1,21 +1,20 @@
 package its.progetto.nightowl;
 
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,14 +22,11 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -42,9 +38,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * An activity that displays a map showing the place at the device's current location.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapActivity.class.getSimpleName();
@@ -74,12 +70,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
 
-    // Used for selecting the current place.
-    private static final int M_MAX_ENTRIES = 5;
-    private String[] mLikelyPlaceNames;
-    private String[] mLikelyPlaceAddresses;
-    private String[] mLikelyPlaceAttributions;
-    private LatLng[] mLikelyPlaceLatLngs;
+    private List<Marker> markers = new ArrayList<Marker>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +112,37 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             super.onSaveInstanceState(outState);
         }
     }
+    /**
+     * Sets up the options menu.
+     * @param menu The options menu.
+     * @return Boolean.
+     */
+   /* @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.current_place_menu, menu);
+        return true;
+    }
+    /**
+     * Handles a click on the menu option to get a place.
+     * @param item The menu item to handle.
+     * @return Boolean.
+     */
+    /*@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.option_get_place) {
+            showCurrentPlace();
+        }
+        return true;
+    }
+    /**
+     * Prompts the user to select the current place from a list of likely places, and shows the
+     * current place on the map - provided the user has granted location permission.
+     */
+    /*private void showCurrentPlace() {
+        if (mMap == null) {
+            return;
+        }
+    }*/
 
     /**
      * Manipulates the map when it's available.
@@ -132,15 +154,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setMapToolbarEnabled(true);
-        Log.i("massimo", "Sto per eseguire addMarkersToMap");
         addMarkersToMap();
-        Log.i("massimo", "Ho eseguito addMarkersToMap");
-        LatLng mLocation = new LatLng(-33.8523341, 151.2106085);
-        mMap.addMarker(new MarkerOptions()
-                .title("motherfucker")
-                .position(mLocation)
-                .snippet("Everything doesn't fucking work'"));
-
         // Use a custom info window adapter to handle multiple lines of text in the
         // info window contents.
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -166,7 +180,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 return infoWindow;
             }
         });
-
         // Prompt the user for permission.
         getLocationPermission();
 
@@ -179,11 +192,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void addMarkersToMap() {
         Log.i("massimo", "Sono nell'addMarkersToMap");
-        DataGetter getter = new DataGetter( "https://api.openaq.org/v1/locations" );
+        //https://api.openaq.org/v1/locations
+        DataGetter getter = new DataGetter( "https://api.myjson.com/bins/nyxlh" );
         getter.getData(new DataGetter.ResultCallback() {
             @Override
             public void onError(int errorCode) {
-                Log.i("massimo", "Sono nell'OnError");
                 Toast.makeText( MapActivity.this, R.string.common_error_internet, Toast.LENGTH_LONG ).show();
             }
             @Override
@@ -191,27 +204,17 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                 try {
 
                     JSONObject obj = new JSONObject(result);
-                    Log.i("massimo", "Sono nell'OnSuccess");
                     JSONArray array = obj.getJSONArray( "results" );
-                    //JSONArray latlngArray = obj.getJSONArray("coordinates");
-                    //LatLng mLocation = new LatLng(-33.8523341, 151.2106085);
+
 
                     for( int i = 0; i < array.length(); i++ ) {
-                        Log.i("massimo","sono nel ciclo for");
                         JSONObject rowObj = array.getJSONObject(i);
-                        Log.i("massimo", "Località: " + rowObj.getString("location"));
-                        Log.i("massimo", "Città: " + rowObj.getString("city") + " Paese: " + rowObj.getString("country"));
-                        //for (int c = 0; c < latlngArray.length(); c++) {
-                            //JSONObject latlngObj = latlngArray.getJSONObject(c);
-                            //mLocation = new LatLng(latlngObj.getInt("latitude"), latlngObj.getInt("longitude"));
-
-                            Log.i("massimo", "Latitudine: " + rowObj.getInt("latitude") + " Longitudine: " + rowObj.getInt("longitude"));
-                        //}
                         LatLng mLocation = new LatLng(rowObj.getInt("latitude"), rowObj.getInt("longitude"));
-                        mMap.addMarker(new MarkerOptions()
+                        Marker m = mMap.addMarker(new MarkerOptions()
                                 .title(rowObj.getString("location"))
                                 .position(mLocation)
                                 .snippet("Città: " + rowObj.getString("city") + " Paese: " + rowObj.getString("country")));
+                        markers.add(m);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -220,6 +223,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             }
         });
     }
+
+    //@Override
+    //public boolean onCreateOptionsMenu(Menu menu) {
+        /*getMenuInflater().inflate(R.menu.current_place_menu, menu);
+        MenuItem item = menu.findItem(R.id.spinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        spinner.setAdapter(adapter); // set the adapter to provide layout of rows and content
+        spinner.setOnItemSelectedListener(onItemSelectedListener); // set the listener, to perform actions based on item selection*/
+
+
+        /*Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);*/
+        //return;
+    //}
 
     /**
      * Gets the current location of the device, and positions the map's camera.
