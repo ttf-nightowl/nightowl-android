@@ -1,9 +1,11 @@
 package its.progetto.nightowl;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -32,7 +34,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
     private GoogleApiClient mGoogleApiClient;
-
     private com.google.android.gms.location.LocationListener listener;
 
     @Override
@@ -51,11 +52,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .build();
 
         LocationManager mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
         checkLocation(); //Controllo se il GPS sia attivo o meno sul telefono
         checkPosition.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent (MainActivity.this, MapActivity.class);
+                Intent intent = intent = new Intent (MainActivity.this, MapActivity.class);
+                /*Bundle extras = new Bundle();
+                extras.putDouble("EXTRA_LONGITUDE",mLocation.getLongitude());
+                extras.putDouble("EXTRA_LATITUDE",mLocation.getLatitude());
+                intent.putExtras(extras);*/
                 startActivity(intent);
             }
         });
@@ -85,6 +89,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             mLatitudeTextView.setText(String.valueOf(mLocation.getLatitude()));
             mLongitudeTextView.setText(String.valueOf(mLocation.getLongitude()));
+
+
+            SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("Longitudine", String.valueOf(mLocation.getLongitude()));
+            editor.putString("Latitudine",String.valueOf(mLocation.getLatitude()));
+            editor.apply();
         } else {
             Toast.makeText(this, "Posizione non trovata", Toast.LENGTH_SHORT).show();
         }
@@ -145,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onLocationChanged(Location location) {
         mLatitudeTextView.setText(String.valueOf(location.getLatitude()));
-        mLongitudeTextView.setText(String.valueOf(location.getLongitude() ));
+        mLongitudeTextView.setText(String.valueOf(location.getLongitude()));
         // You can now create a LatLng Object for use with maps
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
     }

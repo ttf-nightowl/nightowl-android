@@ -1,5 +1,7 @@
 package its.progetto.nightowl;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -71,6 +73,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final String KEY_LOCATION = "location";
 
     private List<Marker> markers = new ArrayList<Marker>();
+
+    /*Bundle extras = getIntent().getExtras();
+    double longitude = extras.getDouble("EXTRA_LONGITUDE");
+    double latitude = extras.getDouble("EXTRA_LATITUDE");
+    final String URL = "http://localhost:8080/search?latitude="+latitude+"&longitude="+longitude+"";*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,7 +200,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private void addMarkersToMap() {
         Log.i("massimo", "Sono nell'addMarkersToMap");
         //https://api.openaq.org/v1/locations
-        DataGetter getter = new DataGetter( "https://api.myjson.com/bins/nyxlh" );
+        SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
+        String latitude = sp.getString("Latitudine", "0");
+        String longitude = sp.getString("Longitudine", "0");
+        String URL = "http://localhost:8080/search?latitude="+latitude+"&longitude="+longitude+"";
+        Log.i("massimo", URL);
+        DataGetter getter = new DataGetter( URL);
         getter.getData(new DataGetter.ResultCallback() {
             @Override
             public void onError(int errorCode) {
@@ -203,11 +215,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             public void onSuccess(String result) {
                 try {
 
-                    JSONObject obj = new JSONObject(result);
-                    JSONArray array = obj.getJSONArray( "results" );
-
+                    //JSONObject obj = new JSONObject(result);
+                    //JSONArray array = obj.getJSONArray( "results" );
+                    JSONArray array = new JSONArray( );
 
                     for( int i = 0; i < array.length(); i++ ) {
+                        JSONArray rowObj = array.getJSONArray(i);
+                        LatLng mLocation = new LatLng(rowObj.getInt(Integer.parseInt("latitude")), rowObj.getInt(Integer.parseInt("longitude")));
+                        Marker m = mMap.addMarker(new MarkerOptions()
+                                .title(rowObj.getString(Integer.parseInt("name")))
+                                .position(mLocation)
+                                .snippet("Tipo locale: " + rowObj.getString(Integer.parseInt("type")) + "/n Paese: " + rowObj.getString(Integer.parseInt("description"))));
+                        markers.add(m);
+                    }
+                    
+                    /*for( int i = 0; i < array.length(); i++ ) {
                         JSONObject rowObj = array.getJSONObject(i);
                         LatLng mLocation = new LatLng(rowObj.getInt("latitude"), rowObj.getInt("longitude"));
                         Marker m = mMap.addMarker(new MarkerOptions()
@@ -215,7 +237,8 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                                 .position(mLocation)
                                 .snippet("Città: " + rowObj.getString("city") + " Paese: " + rowObj.getString("country")));
                         markers.add(m);
-                    }
+                    }*/
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
