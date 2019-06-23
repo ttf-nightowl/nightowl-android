@@ -20,6 +20,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning">
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDb4TsGf8NP62DJBJGc1WVUd-_s9eY1UQY" />

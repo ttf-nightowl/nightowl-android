@@ -203,7 +203,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
         String latitude = sp.getString("Latitudine", "0");
         String longitude = sp.getString("Longitudine", "0");
-        String URL = "http://localhost:8080/search?latitude="+latitude+"&longitude="+longitude+"";
+        String URL = "http://10.0.2.2:8080/search?latitude="+latitude+"&longitude="+longitude;
         Log.i("massimo", URL);
         DataGetter getter = new DataGetter( URL);
         getter.getData(new DataGetter.ResultCallback() {
@@ -217,15 +217,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
                     //JSONObject obj = new JSONObject(result);
                     //JSONArray array = obj.getJSONArray( "results" );
-                    JSONArray array = new JSONArray( );
+                    JSONArray array = new JSONArray(result);
 
                     for( int i = 0; i < array.length(); i++ ) {
-                        JSONArray rowObj = array.getJSONArray(i);
-                        LatLng mLocation = new LatLng(rowObj.getInt(Integer.parseInt("latitude")), rowObj.getInt(Integer.parseInt("longitude")));
+                        JSONObject rowObj = array.getJSONObject(i);
+                        LatLng mLocation = new LatLng(rowObj.getDouble("latitude"), rowObj.getDouble("longitude"));
                         Marker m = mMap.addMarker(new MarkerOptions()
-                                .title(rowObj.getString(Integer.parseInt("name")))
+                                .title(rowObj.getString("name"))
                                 .position(mLocation)
-                                .snippet("Tipo locale: " + rowObj.getString(Integer.parseInt("type")) + "/n Paese: " + rowObj.getString(Integer.parseInt("description"))));
+                                .snippet("Tipo locale: " + rowObj.getString("type") + "\nDescrizione: " + rowObj.getString("description")));
                         markers.add(m);
                     }
                     
