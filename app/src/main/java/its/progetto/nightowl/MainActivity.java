@@ -11,7 +11,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,7 +24,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener{
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 0;
@@ -34,7 +32,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
     private GoogleApiClient mGoogleApiClient;
-    private com.google.android.gms.location.LocationListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,16 +47,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
-        LocationManager mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         checkLocation(); //Controllo se il GPS sia attivo o meno sul telefono
         checkPosition.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = intent = new Intent (MainActivity.this, MapActivity.class);
-                /*Bundle extras = new Bundle();
-                extras.putDouble("EXTRA_LONGITUDE",mLocation.getLongitude());
-                extras.putDouble("EXTRA_LATITUDE",mLocation.getLatitude());
-                intent.putExtras(extras);*/
+
                 startActivity(intent);
             }
         });
@@ -79,18 +71,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         startLocationUpdates();
-
         Location mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
         if(mLocation == null){
             startLocationUpdates();
         }
         if (mLocation != null) {
-
             mLatitudeTextView.setText(String.valueOf(mLocation.getLatitude()));
             mLongitudeTextView.setText(String.valueOf(mLocation.getLongitude()));
-
-
             SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
             SharedPreferences.Editor editor = sp.edit();
             editor.putString("Longitudine", String.valueOf(mLocation.getLongitude()));
@@ -157,8 +145,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onLocationChanged(Location location) {
         mLatitudeTextView.setText(String.valueOf(location.getLatitude()));
         mLongitudeTextView.setText(String.valueOf(location.getLongitude()));
-        // You can now create a LatLng Object for use with maps
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     private boolean checkLocation() {
@@ -194,5 +180,4 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
-
 }

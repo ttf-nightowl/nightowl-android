@@ -8,15 +8,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,18 +61,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location mLastKnownLocation;
-    private Marker mMarker;
 
     // Keys for storing activity state.
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
 
     private List<Marker> markers = new ArrayList<Marker>();
-
-    /*Bundle extras = getIntent().getExtras();
-    double longitude = extras.getDouble("EXTRA_LONGITUDE");
-    double latitude = extras.getDouble("EXTRA_LATITUDE");
-    final String URL = "http://localhost:8080/search?latitude="+latitude+"&longitude="+longitude+"";*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +77,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
             mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
         }
-
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_map);
 
@@ -105,7 +93,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         MapFragment mapFragment = (MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
 
     /**
@@ -119,37 +106,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             super.onSaveInstanceState(outState);
         }
     }
-    /**
-     * Sets up the options menu.
-     * @param menu The options menu.
-     * @return Boolean.
-     */
-   /* @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        return true;
-    }
-    /**
-     * Handles a click on the menu option to get a place.
-     * @param item The menu item to handle.
-     * @return Boolean.
-     */
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.option_get_place) {
-            showCurrentPlace();
-        }
-        return true;
-    }
-    /**
-     * Prompts the user to select the current place from a list of likely places, and shows the
-     * current place on the map - provided the user has granted location permission.
-     */
-    /*private void showCurrentPlace() {
-        if (mMap == null) {
-            return;
-        }
-    }*/
 
     /**
      * Manipulates the map when it's available.
@@ -198,13 +154,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     }
 
     private void addMarkersToMap() {
-        Log.i("massimo", "Sono nell'addMarkersToMap");
-        //https://api.openaq.org/v1/locations
         SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
         String latitude = sp.getString("Latitudine", "0");
         String longitude = sp.getString("Longitudine", "0");
-        String URL = "http://localhost:8080/search?latitude="+latitude+"&longitude="+longitude+"";
-        Log.i("massimo", URL);
+        String URL = "http://192.168.0.104:8080/search?latitude="+latitude+"&longitude="+longitude+"";
         DataGetter getter = new DataGetter( URL);
         getter.getData(new DataGetter.ResultCallback() {
             @Override
@@ -214,58 +167,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onSuccess(String result) {
                 try {
-
-                    //JSONObject obj = new JSONObject(result);
-                    //JSONArray array = obj.getJSONArray( "results" );
-                    JSONArray array = new JSONArray( );
+                    JSONArray array = new JSONArray(result);
 
                     for( int i = 0; i < array.length(); i++ ) {
-                        JSONArray rowObj = array.getJSONArray(i);
-                        LatLng mLocation = new LatLng(rowObj.getInt(Integer.parseInt("latitude")), rowObj.getInt(Integer.parseInt("longitude")));
+                        JSONObject rowObj = array.getJSONObject(i);
+                        LatLng mLocation = new LatLng(rowObj.getDouble("latitude"), rowObj.getDouble("longitude"));
                         Marker m = mMap.addMarker(new MarkerOptions()
-                                .title(rowObj.getString(Integer.parseInt("name")))
+                                .title(rowObj.getString("name"))
                                 .position(mLocation)
-                                .snippet("Tipo locale: " + rowObj.getString(Integer.parseInt("type")) + "/n Paese: " + rowObj.getString(Integer.parseInt("description"))));
+                                .snippet("Tipo locale: " + rowObj.getString("type") + "\nDescrizione: " + rowObj.getString("description")));
                         markers.add(m);
                     }
-                    
-                    /*for( int i = 0; i < array.length(); i++ ) {
-                        JSONObject rowObj = array.getJSONObject(i);
-                        LatLng mLocation = new LatLng(rowObj.getInt("latitude"), rowObj.getInt("longitude"));
-                        Marker m = mMap.addMarker(new MarkerOptions()
-                                .title(rowObj.getString("location"))
-                                .position(mLocation)
-                                .snippet("Città: " + rowObj.getString("city") + " Paese: " + rowObj.getString("country")));
-                        markers.add(m);
-                    }*/
-
-                } catch (JSONException e) {
+                }
+                catch (JSONException e)
+                {
                     e.printStackTrace();
                 }
-
             }
         });
     }
-
-    //@Override
-    //public boolean onCreateOptionsMenu(Menu menu) {
-        /*getMenuInflater().inflate(R.menu.current_place_menu, menu);
-        MenuItem item = menu.findItem(R.id.spinner);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
-        spinner.setAdapter(adapter); // set the adapter to provide layout of rows and content
-        spinner.setOnItemSelectedListener(onItemSelectedListener); // set the listener, to perform actions based on item selection*/
-
-
-        /*Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinner.setAdapter(adapter);*/
-        //return;
-    //}
-
     /**
      * Gets the current location of the device, and positions the map's camera.
      */
@@ -300,8 +220,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Log.e("Exception: %s", e.getMessage());
         }
     }
-
-
     /**
      * Prompts the user for permission to use the device location.
      */
@@ -341,7 +259,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
         updateLocationUI();
     }
-
     /**
      * Updates the map's UI settings based on whether the user has granted location permission.
      */
@@ -363,6 +280,4 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             Log.e("Exception: %s", e.getMessage());
         }
     }
-
-
 }
