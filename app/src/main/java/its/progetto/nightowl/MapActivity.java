@@ -157,7 +157,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         SharedPreferences sp = getSharedPreferences("your_prefs", Activity.MODE_PRIVATE);
         String latitude = sp.getString("Latitudine", "0");
         String longitude = sp.getString("Longitudine", "0");
-        String URL = "http://192.168.0.104:8080/search?latitude="+latitude+"&longitude="+longitude+"";
+        String URL = "http://10.0.2.2:8080/search?latitude="+latitude+"&longitude="+longitude+"";
         DataGetter getter = new DataGetter( URL);
         getter.getData(new DataGetter.ResultCallback() {
             @Override
